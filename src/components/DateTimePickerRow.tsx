@@ -20,17 +20,19 @@ export const DateTimePickerRow: React.FC<DateTimePickerRowProps> = ({
   // Android Native Date Picker Dialog
   const openDatePicker = () => {
     if (Platform.OS === 'android') {
+      const now = new Date();
       DateTimePickerAndroid.open({
-        value: currentDate,
+        value: dueAt ? new Date(dueAt) : now,
         onChange: (event, selectedDate) => {
           if (event.type === 'set' && selectedDate) {
-            // Preserve the time from currentDate or default to 9:00 AM
+            // Preserve the time from existing dueAt or default to current time
             const updated = new Date(selectedDate);
             if (dueAt) {
               const prev = new Date(dueAt);
               updated.setHours(prev.getHours(), prev.getMinutes(), 0, 0);
             } else {
-              updated.setHours(9, 0, 0, 0);
+              const currentTime = new Date();
+              updated.setHours(currentTime.getHours(), currentTime.getMinutes(), 0, 0);
             }
             onChangeDueAt(updated.getTime());
           }
@@ -43,12 +45,14 @@ export const DateTimePickerRow: React.FC<DateTimePickerRowProps> = ({
   // Android Native Time Picker Dialog
   const openTimePicker = () => {
     if (Platform.OS === 'android') {
+      const now = new Date();
       DateTimePickerAndroid.open({
-        value: currentDate,
+        value: dueAt ? new Date(dueAt) : now,
         onChange: (event, selectedTime) => {
           if (event.type === 'set' && selectedTime) {
-            // Preserve the date, update hour and minute
-            const updated = new Date(currentDate);
+            // Preserve the date (or use today), update hour and minute
+            const base = dueAt ? new Date(dueAt) : new Date();
+            const updated = new Date(base);
             updated.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
             onChangeDueAt(updated.getTime());
           }

@@ -5,13 +5,13 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppTheme } from '../../src/theme/useAppTheme';
+import { useDialog } from '../../src/context/DialogContext';
 import {
   Task,
   getCompletedTasks,
@@ -28,6 +28,7 @@ export default function CompletedScreen() {
   const { colors, typography, radii } = useAppTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { showAlert, showConfirm } = useDialog();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -68,47 +69,40 @@ export default function CompletedScreen() {
   };
 
   const handleDelete = (task: Task) => {
-    Alert.alert(
-      'Delete Task',
-      `Permanently delete "${task.title}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteTask(task.id);
-            await loadData();
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Delete Task',
+      message: `Permanently delete "${task.title}"?`,
+      confirmText: 'Delete',
+      isDestructive: true,
+      onConfirm: async () => {
+        await deleteTask(task.id);
+        await loadData();
+      },
+    });
   };
 
   const handleClearAll = () => {
     if (tasks.length === 0) return;
-    Alert.alert(
-      'Clear All Completed',
-      `Permanently delete all ${tasks.length} completed tasks? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            await clearAllCompleted();
-            await loadData();
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Clear All Completed',
+      message: `Permanently delete all ${tasks.length} completed tasks? This cannot be undone.`,
+      confirmText: 'Clear All',
+      isDestructive: true,
+      onConfirm: async () => {
+        await clearAllCompleted();
+        await loadData();
+      },
+    });
   };
 
   const handleExportMarkdown = async () => {
     try {
       await exportMarkdownArchive();
     } catch (err) {
-      Alert.alert('Export Failed', 'Could not generate markdown archive.');
+      showAlert({
+        title: 'Export Failed',
+        message: 'Could not generate markdown archive.',
+      });
     }
   };
 
@@ -116,7 +110,10 @@ export default function CompletedScreen() {
     try {
       await exportJsonBackup();
     } catch (err) {
-      Alert.alert('Export Failed', 'Could not export JSON backup.');
+      showAlert({
+        title: 'Export Failed',
+        message: 'Could not export JSON backup.',
+      });
     }
   };
 

@@ -7,12 +7,12 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppTheme } from '../src/theme/useAppTheme';
+import { useDialog } from '../src/context/DialogContext';
 import {
   createTask,
   getAllDistinctTags,
@@ -26,6 +26,7 @@ export default function NewReminderModal() {
   const { colors, radii } = useAppTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { showAlert } = useDialog();
 
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
@@ -42,15 +43,8 @@ export default function NewReminderModal() {
   const [repeatRule, setRepeatRule] = useState<RepeatRule>('none');
   const [isSticky, setIsSticky] = useState(false);
 
-  // Due Date state (defaults to today 9 PM)
-  const [dueAt, setDueAt] = useState<number | null>(() => {
-    const d = new Date();
-    d.setHours(21, 0, 0, 0);
-    if (d.getTime() <= Date.now()) {
-      d.setDate(d.getDate() + 1);
-    }
-    return d.getTime();
-  });
+  // Due Date state (defaults to current date and current time)
+  const [dueAt, setDueAt] = useState<number | null>(() => Date.now());
 
   useEffect(() => {
     getAllDistinctTags().then((tags) => {
@@ -75,7 +69,11 @@ export default function NewReminderModal() {
   const handleSave = async () => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      Alert.alert('Required', 'Please enter a reminder title.');
+      showAlert({
+        title: 'Required',
+        message: 'Please enter a reminder title.',
+        icon: 'alert-outline',
+      });
       return;
     }
 
@@ -97,7 +95,11 @@ export default function NewReminderModal() {
       router.back();
     } catch (err) {
       console.warn('[Taskion] Error saving reminder:', err);
-      Alert.alert('Error', 'Could not save reminder. Please try again.');
+      showAlert({
+        title: 'Error',
+        message: 'Could not save reminder. Please try again.',
+        icon: 'alert-circle-outline',
+      });
     }
   };
 

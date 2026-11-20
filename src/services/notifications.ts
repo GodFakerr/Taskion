@@ -123,6 +123,7 @@ export async function cancelTaskNotification(notificationId: string | null | und
   if (!notificationId) return;
   try {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
+    await Notifications.dismissNotificationAsync(notificationId);
   } catch (error) {
     console.warn('[Taskion] Failed to cancel notification:', error);
   }
@@ -148,6 +149,16 @@ export function registerNotificationResponseListener(
   onTaskChanged?: (taskId: string, action: string) => void
 ): Notifications.Subscription {
   return Notifications.addNotificationResponseReceivedListener(async (response) => {
+    // Dismiss the notification from the Android notification tray immediately
+    const notifIdentifier = response.notification?.request?.identifier;
+    if (notifIdentifier) {
+      try {
+        await Notifications.dismissNotificationAsync(notifIdentifier);
+      } catch (err) {
+        console.warn('[Taskion] Error dismissing notification from tray:', err);
+      }
+    }
+
     const actionId = response.actionIdentifier;
     const taskId = response.notification.request.content.data?.taskId as string | undefined;
 

@@ -9,6 +9,7 @@ import {
   registerNotificationResponseListener,
 } from '../src/services/notifications';
 import { useAppTheme } from '../src/theme/useAppTheme';
+import { DialogProvider } from '../src/context/DialogContext';
 
 export default function RootLayout() {
   const { colors, isDark } = useAppTheme();
@@ -43,26 +44,28 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
       <SafeAreaProvider>
-        <StatusBar style={isDark ? 'light' : 'dark'} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-            animation: 'slide_from_right',
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="new-reminder"
-            options={{
-              presentation: 'modal',
+        <DialogProvider>
+          <StatusBar style={isDark ? 'light' : 'dark'} />
+          <Stack
+            screenOptions={{
               headerShown: false,
-              animation: 'slide_from_bottom',
+              contentStyle: { backgroundColor: colors.background },
+              animation: 'slide_from_right',
             }}
-          />
-          <Stack.Screen name="task/[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="settings" options={{ headerShown: false }} />
-        </Stack>
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="new-reminder"
+              options={{
+                presentation: 'modal',
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen name="task/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="settings" options={{ headerShown: false }} />
+          </Stack>
+        </DialogProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

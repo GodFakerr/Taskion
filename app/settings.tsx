@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Alert,
   Platform,
   Image,
 } from 'react-native';
@@ -15,6 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Notifications from 'expo-notifications';
 import { useAppTheme } from '../src/theme/useAppTheme';
+import { useDialog } from '../src/context/DialogContext';
 import {
   exportJsonBackup,
   importJsonBackup,
@@ -30,6 +30,7 @@ export default function SettingsScreen() {
   const { colors, radii, typography } = useAppTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { showAlert, showConfirm } = useDialog();
 
   const [notificationPermissionGranted, setNotificationPermissionGranted] = useState(false);
   const [scheduledCount, setScheduledCount] = useState(0);
@@ -78,7 +79,11 @@ export default function SettingsScreen() {
           }
         );
       } catch {
-        Alert.alert('Notice', 'Please enable notifications in Android Settings for Taskion.');
+        showAlert({
+          title: 'Notice',
+          message: 'Please enable notifications in Android Settings for Taskion.',
+          icon: 'bell-outline',
+        });
       }
     }
   };
@@ -99,11 +104,19 @@ export default function SettingsScreen() {
             }
           );
         } catch {
-          Alert.alert('Notice', 'Please open Android Settings > Apps > Taskion > Battery to disable optimization.');
+          showAlert({
+            title: 'Notice',
+            message: 'Please open Android Settings > Apps > Taskion > Battery to disable optimization.',
+            icon: 'battery-alert-variant-outline',
+          });
         }
       }
     } else {
-      Alert.alert('Notice', 'Battery optimization shortcuts are specific to Android.');
+      showAlert({
+        title: 'Notice',
+        message: 'Battery optimization shortcuts are specific to Android.',
+        icon: 'information-outline',
+      });
     }
   };
 
@@ -111,12 +124,16 @@ export default function SettingsScreen() {
     try {
       const result = await syncAllScheduledNotifications();
       await checkStatus();
-      Alert.alert(
-        'Alarms Synchronized',
-        `Synced: ${result.synced} future alarms.\nCleared: ${result.cancelled} obsolete alarms.`
-      );
+      showAlert({
+        title: 'Alarms Synchronized',
+        message: `Synced: ${result.synced} future alarms.\nCleared: ${result.cancelled} obsolete alarms.`,
+        icon: 'sync',
+      });
     } catch {
-      Alert.alert('Sync Error', 'Could not synchronize notifications.');
+      showAlert({
+        title: 'Sync Error',
+        message: 'Could not synchronize notifications.',
+      });
     }
   };
 
@@ -125,47 +142,55 @@ export default function SettingsScreen() {
       setIsExporting(true);
       await exportJsonBackup();
     } catch {
-      Alert.alert('Export Failed', 'Could not export JSON backup.');
+      showAlert({
+        title: 'Export Failed',
+        message: 'Could not export JSON backup.',
+      });
     } finally {
       setIsExporting(false);
     }
   };
 
   const handleImportJson = async () => {
-    Alert.alert(
-      'Import Backup',
-      'Importing a JSON backup will replace all current tasks with the backup contents. Continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Choose File & Restore',
-          onPress: async () => {
-            try {
-              setIsImporting(true);
-              const result = await importJsonBackup();
-              if (result.success) {
-                await checkStatus();
-                Alert.alert(
-                  'Restore Successful',
-                  `Successfully restored ${result.tasksCount} tasks and ${result.subtasksCount} subtasks.`
-                );
-              }
-            } catch {
-              Alert.alert('Import Failed', 'The selected file is not a valid Taskion backup.');
-            } finally {
-              setIsImporting(false);
-            }
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Import Backup',
+      message: 'Importing a JSON backup will replace all current tasks with the backup contents. Continue?',
+      confirmText: 'Choose File & Restore',
+      cancelText: 'Cancel',
+      icon: 'file-import-outline',
+      isDestructive: false,
+      onConfirm: async () => {
+        try {
+          setIsImporting(true);
+          const result = await importJsonBackup();
+          if (result.success) {
+            await checkStatus();
+            showAlert({
+              title: 'Restore Successful',
+              message: `Successfully restored ${result.tasksCount} tasks and ${result.subtasksCount} subtasks.`,
+              icon: 'check-circle-outline',
+            });
+          }
+        } catch {
+          showAlert({
+            title: 'Import Failed',
+            message: 'The selected file is not a valid Taskion backup.',
+          });
+        } finally {
+          setIsImporting(false);
+        }
+      },
+    });
   };
 
   const handleExportMarkdown = async () => {
     try {
       await exportMarkdownArchive();
     } catch {
-      Alert.alert('Export Failed', 'Could not generate markdown file.');
+      showAlert({
+        title: 'Export Failed',
+        message: 'Could not generate markdown file.',
+      });
     }
   };
 

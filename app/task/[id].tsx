@@ -7,12 +7,12 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppTheme } from '../../src/theme/useAppTheme';
+import { useDialog } from '../../src/context/DialogContext';
 import {
   Task,
   Subtask,
@@ -38,6 +38,7 @@ export default function TaskDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors, radii } = useAppTheme();
+  const { showAlert, showConfirm } = useDialog();
 
   const [task, setTask] = useState<Task | null>(null);
   const [title, setTitle] = useState('');
@@ -129,11 +130,19 @@ export default function TaskDetailScreen() {
       }
 
       setHasChanges(false);
-      Alert.alert('Saved', 'Reminder updated successfully.');
-      await loadTask();
+      showAlert({
+        title: 'Saved',
+        message: 'Reminder updated successfully.',
+        onConfirm: () => {
+          router.back();
+        },
+      });
     } catch (err) {
       console.warn('[Taskion] Error updating task:', err);
-      Alert.alert('Error', 'Could not save changes.');
+      showAlert({
+        title: 'Error',
+        message: 'Could not save changes.',
+      });
     }
   };
 
@@ -156,24 +165,19 @@ export default function TaskDetailScreen() {
 
   const handleDeleteTask = () => {
     if (!task) return;
-    Alert.alert(
-      'Delete Task',
-      `Permanently delete "${task.title}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            if (task.notification_id) {
-              await cancelTaskNotification(task.notification_id);
-            }
-            await deleteTask(task.id);
-            router.back();
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Delete Task',
+      message: `Permanently delete "${task.title}"?`,
+      confirmText: 'Delete',
+      isDestructive: true,
+      onConfirm: async () => {
+        if (task.notification_id) {
+          await cancelTaskNotification(task.notification_id);
+        }
+        await deleteTask(task.id);
+        router.back();
+      },
+    });
   };
 
   const handleAddSubtask = async () => {
