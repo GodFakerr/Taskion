@@ -40,6 +40,17 @@
         }
       ],
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "653c29c7-50a3-44be-99b5-c262d91f25ec"
+      }
+    },
+    "owner": "godfaker"
   }
 }
