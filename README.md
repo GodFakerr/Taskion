@@ -50,32 +50,34 @@ Everything is stored locally on your device with native Android exact alarms and
 ## 🏗️ Architecture
 
 ```text
-app/
-  _layout.tsx                 # Root Stack: Notification channels, startup sync, global theme
-  (tabs)/
-    _layout.tsx               # Material 3 Custom Bottom Tab Bar (Today, Scheduled, Completed)
-    index.tsx                 # Screen 1: Today Dashboard & Reanimated NLP Quick-Add Dock
-    scheduled.tsx             # Screen 2: 7-Day Strip & Chronological Grouped List
-    completed.tsx             # Screen 3: Completed Archive, Restore & Purge
-  new-reminder.tsx            # Screen 4: Full Create Reminder Modal
-  task/[id].tsx               # Screen 5: In-Place Task Detail & Subtask Checklist
-  settings.tsx                # Screen 6: Android Reliability & JSON/Markdown Backup
-src/
-  components/
-    TaskCard.tsx              # 28px Squircle card with Reanimated checkbox morphing
-    QuickAddBar.tsx           # NLP inline bar with live floating preview chips
-    DateTimePickerRow.tsx     # Native Android Material 3 Date/Time picker dialogs
-    FilterChips.tsx           # Stadium-pill horizontal tag & priority filter bar
-    WeekStrip.tsx             # 7-day calendar selector strip with task indicator dots
-  db/
-    client.ts                 # Local database client initialization
-    tasksRepo.ts              # Typed CRUD operations for tasks and subtasks
-  services/
-    nlp.ts                    # Natural language parser for dates, tags, and priorities
-    notifications.ts          # Android notification channels, exact alarms & snooze actions
-    backup.ts                 # Local JSON database export/import & Markdown archive exporter
-  theme/
-    useAppTheme.ts            # Material 3 Expressive dynamic tokens & dark/light palettes
+Taskion/
+├── app/
+│   ├── _layout.tsx                 # Root Stack: Notification channels, startup sync, global theme
+│   ├── (tabs)/
+│   │   ├── _layout.tsx             # Material 3 Custom Bottom Tab Bar (Today, Scheduled, Completed)
+│   │   ├── index.tsx               # Screen 1: Today Dashboard & Reanimated NLP Quick-Add Dock
+│   │   ├── scheduled.tsx           # Screen 2: 7-Day Strip & Chronological Grouped List
+│   │   └── completed.tsx           # Screen 3: Completed Archive, Restore & Purge
+│   ├── new-reminder.tsx            # Screen 4: Full Create Reminder Modal
+│   ├── settings.tsx                # Screen 5: Android Reliability & JSON/Markdown Backup
+│   └── task/
+│       └── [id].tsx                # Screen 6: In-Place Task Detail & Subtask Checklist
+└── src/
+    ├── components/
+    │   ├── DateTimePickerRow.tsx   # Native Android Material 3 Date/Time picker dialogs
+    │   ├── FilterChips.tsx         # Stadium-pill horizontal tag & priority filter bar
+    │   ├── QuickAddBar.tsx         # NLP inline bar with live floating preview chips
+    │   ├── TaskCard.tsx            # 28px Squircle card with Reanimated checkbox morphing
+    │   └── WeekStrip.tsx           # 7-day calendar selector strip with task indicator dots
+    ├── db/
+    │   ├── client.ts               # Local database client initialization
+    │   └── tasksRepo.ts            # Typed CRUD operations for tasks and subtasks
+    ├── services/
+    │   ├── backup.ts               # Local JSON database export/import & Markdown archive exporter
+    │   ├── nlp.ts                  # Natural language parser for dates, tags, and priorities
+    │   └── notifications.ts        # Android notification channels, exact alarms & snooze actions
+    └── theme/
+        └── useAppTheme.ts          # Material 3 Expressive dynamic tokens & dark/light palettes
 ```
 
 ---
